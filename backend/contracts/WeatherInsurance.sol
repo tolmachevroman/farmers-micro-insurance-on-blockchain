@@ -1,65 +1,128 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-contract WeatherInsurance {
-    uint256 public constant SETTLEMENT_MULTIPLIER = 5;
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-    // 38 degrees Celcius or more during 5 days triggers settlement payment
-    uint256 public constant TEMPERATURE_THRESHOLD = 38;
+contract WeatherInsurance is Ownable {
+    // settlement amount is set to premium times multiplier
+    // for example, if client (insuree) paid 1 eth in premium,
+    // he/she will receive 3 eth as a settlement payment
+    uint256 public constant SETTLEMENT_MULTIPLIER = 3;
+
+    // minimum required premium is 0.1 Eth or approximately
+    // 235 USD on Jan 24 2022
+    uint256 public constant MINIMUM_PREMIUM = 1e17;
+
+    // 40 degrees Celcius or more during 5 days in a row triggers settlement payment
+    uint256 public constant TEMPERATURE_THRESHOLD = 40;
 
     mapping(address => bool) private activeInsurances;
     Insurance[] private insurances;
 
     struct Insurance {
-        uint256[5] temperatureInThelastFiveDays; //TODO maybe use uint mediumTemperature?
+        address insuree;
+        uint256[5] temperatureInThelastFiveDays;
         uint256 premium;
     }
+
+    event SettlementPaid(uint256 _amount, address _to);
+
+    constructor() payable {}
 
     function buyInsurance() public payable {
         require(
             activeInsurances[msg.sender] == false,
             "Client already has an active policy"
         );
+        require(msg.value >= MINIMUM_PREMIUM, "Premium value is too low");
+
         Insurance memory newInsurance;
+        newInsurance.insuree = msg.sender;
         newInsurance.premium = msg.value;
+        // newInsurance.temperatureInThelastFiveDays = [0, 0, 0, 0, 0];
 
         activeInsurances[msg.sender] = true;
+        insurances.push(newInsurance);
     }
 
-    function updateTemperature(uint256 _temperature) public view {
+    function updateTemperature(uint256 _newTemperature)
+        public
+        payable
+        onlyOwner
+    {
         // update last temperature in all insurances
         for (uint256 i = 0; i < insurances.length; i++) {
             Insurance memory insurance = insurances[i];
 
             //shift the array and add new temperature to the end
-            insurance.temperatureInThelastFiveDays[0] = insurance
-                .temperatureInThelastFiveDays[1];
-            insurance.temperatureInThelastFiveDays[1] = insurance
-                .temperatureInThelastFiveDays[2];
-            insurance.temperatureInThelastFiveDays[2] = insurance
-                .temperatureInThelastFiveDays[3];
-            insurance.temperatureInThelastFiveDays[3] = insurance
-                .temperatureInThelastFiveDays[4];
-            insurance.temperatureInThelastFiveDays[4] = _temperature;
+            shiftTemperaturesArray(insurance, _newTemperature);
+
+            //check whether new temperature triggers settlement payment for this insurance
+            if (shouldPaySettlement(insurance)) {
+                paySettlement(insurance);
+
+                // remove this insurance from array
+                activeInsurances[insurance.insuree] = false;
+                remove(i);
+            }
         }
     }
 
-    function isTemperatureMoreThanThreshold(Insurance memory insurance)
+    function shiftTemperaturesArray(
+        Insurance memory _insurance,
+        uint256 _newTemperature
+    ) private pure {
+        _insurance.temperatureInThelastFiveDays[0] = _insurance
+            .temperatureInThelastFiveDays[1];
+        _insurance.temperatureInThelastFiveDays[1] = _insurance
+            .temperatureInThelastFiveDays[2];
+        _insurance.temperatureInThelastFiveDays[2] = _insurance
+            .temperatureInThelastFiveDays[3];
+        _insurance.temperatureInThelastFiveDays[3] = _insurance
+            .temperatureInThelastFiveDays[4];
+        _insurance.temperatureInThelastFiveDays[4] = _newTemperature;
+    }
+
+    function shouldPaySettlement(Insurance memory _insurance)
         private
         pure
         returns (bool)
     {
-        bool moreThanThreshold = true;
+        bool isMoreThanThreshold = true;
         for (
             uint256 i = 0;
-            i < insurance.temperatureInThelastFiveDays.length;
+            i < _insurance.temperatureInThelastFiveDays.length;
             i++
         ) {
-            moreThanThreshold =
-                moreThanThreshold &&
-                insurance.temperatureInThelastFiveDays[i] >=
+            isMoreThanThreshold =
+                isMoreThanThreshold &&
+                _insurance.temperatureInThelastFiveDays[i] >=
                 TEMPERATURE_THRESHOLD;
         }
-        return moreThanThreshold;
+        return isMoreThanThreshold;
+    }
+
+    function paySettlement(Insurance memory _insurance)
+        public
+        payable
+        onlyOwner
+    {
+        uint256 settlementToPay = SETTLEMENT_MULTIPLIER * _insurance.premium;
+        address addressToPay = _insurance.insuree;
+
+        (bool sent, ) = addressToPay.call{value: settlementToPay}("");
+        require(sent, "Failed to send Ether");
+
+        emit SettlementPaid(settlementToPay, addressToPay);
+    }
+
+    // removes item from array and shifts from right to left
+    function remove(uint256 _index) private {
+        require(_index < arr.length, "index out of bound");
+
+        for (uint256 i = _index; i < arr.length - 1; i++) {
+            arr[i] = arr[i + 1];
+        }
+        arr.pop();
     }
 }
