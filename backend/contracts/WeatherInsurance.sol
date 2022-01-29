@@ -31,7 +31,7 @@ contract WeatherInsurance is Ownable {
 
     constructor() payable {
         console.log(
-            "Deploying a WeatherInsurance contract with initial balance:",
+            "Deploying a WeatherInsurance contract with initial balance of:",
             msg.value
         );
     }
@@ -49,6 +49,12 @@ contract WeatherInsurance is Ownable {
 
         activeInsurances[msg.sender] = true;
         insurances.push(newInsurance);
+        console.log(
+            "Adding a new insurance: %s with premium of: %s",
+            newInsurance.insuree,
+            newInsurance.premium
+        );
+
     }
 
     function updateTemperature(uint256 _newTemperature)
