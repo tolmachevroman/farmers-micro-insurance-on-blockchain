@@ -18,8 +18,8 @@ contract WeatherInsurance is Ownable {
     // 40 degrees Celcius or more during 5 days in a row triggers settlement payment
     uint256 public constant TEMPERATURE_THRESHOLD = 40;
 
-    mapping(address => bool) private activeInsurances;
-    Insurance[] private insurances;
+    mapping(address => bool) public activeInsurances; //TODO make private after testing
+    Insurance[] public insurances; //TODO make private after testing
 
     struct Insurance {
         address insuree;
@@ -31,7 +31,7 @@ contract WeatherInsurance is Ownable {
 
     constructor() payable {
         console.log(
-            "Deploying a WeatherInsurance with initial balance:",
+            "Deploying a WeatherInsurance contract with initial balance:",
             msg.value
         );
     }
@@ -46,7 +46,6 @@ contract WeatherInsurance is Ownable {
         Insurance memory newInsurance;
         newInsurance.insuree = msg.sender;
         newInsurance.premium = msg.value;
-        // newInsurance.temperatureInThelastFiveDays = [0, 0, 0, 0, 0];
 
         activeInsurances[msg.sender] = true;
         insurances.push(newInsurance);
@@ -62,7 +61,7 @@ contract WeatherInsurance is Ownable {
             Insurance memory insurance = insurances[i];
 
             //shift the array and add new temperature to the end
-            shiftTemperaturesArray(insurance, _newTemperature);
+            shiftTemperatureArray(insurance, _newTemperature);
 
             //check whether new temperature triggers settlement payment for this insurance
             if (shouldPaySettlement(insurance)) {
@@ -75,10 +74,11 @@ contract WeatherInsurance is Ownable {
         }
     }
 
-    function shiftTemperaturesArray(
+    //TODO make private after testing
+    function shiftTemperatureArray(
         Insurance memory _insurance,
         uint256 _newTemperature
-    ) private pure {
+    ) public pure {
         _insurance.temperatureInThelastFiveDays[0] = _insurance
             .temperatureInThelastFiveDays[1];
         _insurance.temperatureInThelastFiveDays[1] = _insurance
@@ -90,8 +90,9 @@ contract WeatherInsurance is Ownable {
         _insurance.temperatureInThelastFiveDays[4] = _newTemperature;
     }
 
+    //TODO make private after testing
     function shouldPaySettlement(Insurance memory _insurance)
-        private
+        public
         pure
         returns (bool)
     {
