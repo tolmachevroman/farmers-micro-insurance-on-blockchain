@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+
+import "hardhat/console.sol";
 
 contract WeatherInsurance is Ownable {
     // settlement amount is set to premium times multiplier
@@ -27,7 +29,12 @@ contract WeatherInsurance is Ownable {
 
     event SettlementPaid(uint256 _amount, address _to);
 
-    constructor() payable {}
+    constructor() payable {
+        console.log(
+            "Deploying a WeatherInsurance with initial balance:",
+            msg.value
+        );
+    }
 
     function buyInsurance() public payable {
         require(
@@ -118,11 +125,11 @@ contract WeatherInsurance is Ownable {
 
     // removes item from array and shifts from right to left
     function remove(uint256 _index) private {
-        require(_index < arr.length, "index out of bound");
+        require(_index < insurances.length, "index out of bound");
 
-        for (uint256 i = _index; i < arr.length - 1; i++) {
-            arr[i] = arr[i + 1];
+        for (uint256 i = _index; i < insurances.length - 1; i++) {
+            insurances[i] = insurances[i + 1];
         }
-        arr.pop();
+        insurances.pop();
     }
 }
