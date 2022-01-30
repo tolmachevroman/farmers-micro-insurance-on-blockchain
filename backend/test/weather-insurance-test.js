@@ -17,6 +17,72 @@ describe("Weather Insurance", function () {
     expect(initialBalance).to.equal(value);
   });
 
+  it("Should shift temperatures", async function () {
+    const weatherInsurance = await deployContract();
+
+    const premium = (1e18).toString();
+    const [user1] = await ethers.getSigners();
+
+    const insurance1 = await weatherInsurance.createInsurance(
+      user1.address,
+      premium,
+      30,
+      25,
+      30,
+      41,
+      20
+    );
+
+    const updatedInsurance = await weatherInsurance.shiftTemperatures(
+      insurance1,
+      35
+    );
+
+    // shifts temperatures from right to left to add the last one
+    expect(updatedInsurance.temperature.day1).to.equal(25);
+    expect(updatedInsurance.temperature.day2).to.equal(30);
+    expect(updatedInsurance.temperature.day3).to.equal(41);
+    expect(updatedInsurance.temperature.day4).to.equal(20);
+    expect(updatedInsurance.temperature.day5).to.equal(35);
+  });
+
+  it("Should evaluate possible payments based on last five days temperature", async function () {
+    const weatherInsurance = await deployContract();
+
+    const premium = (1e18).toString();
+    const [user1] = await ethers.getSigners();
+
+    const insurance1 = await weatherInsurance.createInsurance(
+      user1.address,
+      premium,
+      30,
+      25,
+      30,
+      41,
+      20
+    );
+
+    // have not seen extreme temperatures, do not trigger
+    expect(await weatherInsurance.shouldPaySettlement(insurance1)).be.equal(
+      false
+    );
+
+    const insurance2 = await weatherInsurance.createInsurance(
+      user1.address,
+      premium,
+      40,
+      41,
+      40,
+      41,
+      42
+    );
+
+    // have seen extreme temperatures, do trigger
+    expect(await weatherInsurance.shouldPaySettlement(insurance2)).be.equal(
+      true
+    );
+  });
+
   it("Should update temperature for all insurances", async function () {
     const weatherInsurance = await deployContract();
 
@@ -31,16 +97,8 @@ describe("Weather Insurance", function () {
     const insurance1 = await weatherInsurance.insurances(0);
     const insurance2 = await weatherInsurance.insurances(1);
 
-    expect(insurance1.temperature.day1).to.equal(0);
-    expect(insurance1.temperature.day2).to.equal(0);
-    expect(insurance1.temperature.day3).to.equal(0);
-    expect(insurance1.temperature.day4).to.equal(0);
+    // new temperature should be the last in the list of temperatures, other shifted
     expect(insurance1.temperature.day5).to.equal(25);
-
-    expect(insurance2.temperature.day1).to.equal(0);
-    expect(insurance2.temperature.day2).to.equal(0);
-    expect(insurance2.temperature.day3).to.equal(0);
-    expect(insurance2.temperature.day4).to.equal(0);
     expect(insurance2.temperature.day5).to.equal(25);
   });
 });
@@ -48,6 +106,8 @@ describe("Weather Insurance", function () {
 describe("Weather Insurance contract user", function () {
   it("Should be able to buy an insurance", async function () {
     const weatherInsurance = await deployContract();
+
+    const premium = (1e18).toString();
     const [user1] = await ethers.getSigners();
 
     // minimum premium value for insurance
@@ -55,11 +115,10 @@ describe("Weather Insurance contract user", function () {
       weatherInsurance.buyInsurance(user1.address, 1000)
     ).to.be.revertedWith("Premium value is too low");
 
-    // insurance can be successfully created
-    const premium = (1e18).toString();
-
     await weatherInsurance.buyInsurance(user1.address, premium);
     const insurance = await weatherInsurance.insurances(0);
+
+    // insurance can be successfully created
     expect(insurance.premium).to.equal(premium);
     expect(insurance.insuree).to.equal(user1.address);
 
@@ -70,7 +129,5 @@ describe("Weather Insurance contract user", function () {
   });
 });
 
-// TODO test shifting temperatures array (new temperature should be last in the array, other shifted)
-// TODO test whether should pay settlement (whether triggers the payment condition)
 // TODO test paying settlement (whether the Insuree receives the settlement amount)
 // TODO test overall functionality with several accounts

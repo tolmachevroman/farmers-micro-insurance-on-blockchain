@@ -44,6 +44,31 @@ contract WeatherInsurance is Ownable {
         );
     }
 
+    //TODO make private after testing
+    function createInsurance(
+        address _insuree,
+        uint256 _premium,
+        uint8 _day1,
+        uint8 _day2,
+        uint8 _day3,
+        uint8 _day4,
+        uint8 _day5
+    ) public pure returns (Insurance memory) {
+        Temperature memory temperature;
+        temperature.day1 = _day1;
+        temperature.day2 = _day2;
+        temperature.day3 = _day3;
+        temperature.day4 = _day4;
+        temperature.day5 = _day5;
+
+        Insurance memory newInsurance;
+        newInsurance.insuree = _insuree;
+        newInsurance.premium = _premium;
+        newInsurance.temperature = temperature;
+
+        return newInsurance;
+    }
+
     function buyInsurance(address _insuree, uint256 _premium) public payable {
         require(
             activeInsurances[_insuree] == false,
@@ -51,12 +76,15 @@ contract WeatherInsurance is Ownable {
         );
         require(_premium >= MINIMUM_PREMIUM, "Premium value is too low");
 
-        Temperature memory temperature;
-
-        Insurance memory newInsurance;
-        newInsurance.insuree = _insuree;
-        newInsurance.premium = _premium;
-        newInsurance.temperature = temperature;
+        Insurance memory newInsurance = createInsurance(
+            _insuree,
+            _premium,
+            0,
+            0,
+            0,
+            0,
+            0
+        );
 
         activeInsurances[_insuree] = true;
         insurances.push(newInsurance);
@@ -89,7 +117,6 @@ contract WeatherInsurance is Ownable {
         }
     }
 
-    //TODO make private after testing
     function shiftTemperatures(
         Insurance memory _insurance,
         uint8 _newTemperature
