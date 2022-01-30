@@ -24,7 +24,6 @@ describe("Weather Insurance", function () {
     const [user1, user2] = await ethers.getSigners();
 
     await weatherInsurance.buyInsurance(user1.address, premium);
-
     await weatherInsurance.buyInsurance(user2.address, premium);
 
     await weatherInsurance.updateTemperature(25);
@@ -32,8 +31,17 @@ describe("Weather Insurance", function () {
     const insurance1 = await weatherInsurance.insurances(0);
     const insurance2 = await weatherInsurance.insurances(1);
 
-    console.log(insurance2);
-    // expect(insurance.premium).to.equal(premium);
+    expect(insurance1.temperature.day1).to.equal(0);
+    expect(insurance1.temperature.day2).to.equal(0);
+    expect(insurance1.temperature.day3).to.equal(0);
+    expect(insurance1.temperature.day4).to.equal(0);
+    expect(insurance1.temperature.day5).to.equal(25);
+
+    expect(insurance2.temperature.day1).to.equal(0);
+    expect(insurance2.temperature.day2).to.equal(0);
+    expect(insurance2.temperature.day3).to.equal(0);
+    expect(insurance2.temperature.day4).to.equal(0);
+    expect(insurance2.temperature.day5).to.equal(25);
   });
 });
 
@@ -62,7 +70,6 @@ describe("Weather Insurance contract user", function () {
   });
 });
 
-// TODO test update temperature (all active insurances have this temperature as the last one)
 // TODO test shifting temperatures array (new temperature should be last in the array, other shifted)
 // TODO test whether should pay settlement (whether triggers the payment condition)
 // TODO test paying settlement (whether the Insuree receives the settlement amount)

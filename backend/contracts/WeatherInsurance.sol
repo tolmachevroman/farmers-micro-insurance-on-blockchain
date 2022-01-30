@@ -70,10 +70,11 @@ contract WeatherInsurance is Ownable {
     function updateTemperature(uint8 _newTemperature) public payable onlyOwner {
         // update last temperature in all insurances
         for (uint256 i = 0; i < insurances.length; i++) {
-            Insurance memory insurance = insurances[i];
-
-            //shift the array and add new temperature to the end
-            shiftTemperatures(insurance, _newTemperature);
+            //shift the temperatures and add new temperature to the end
+            Insurance memory insurance = shiftTemperatures(
+                insurances[i],
+                _newTemperature
+            );
 
             //check whether new temperature triggers settlement payment for this insurance
             if (shouldPaySettlement(insurance)) {
@@ -82,6 +83,8 @@ contract WeatherInsurance is Ownable {
                 // remove this insurance from array
                 activeInsurances[insurance.insuree] = false;
                 remove(i);
+            } else {
+                insurances[i] = insurance;
             }
         }
     }
@@ -90,12 +93,13 @@ contract WeatherInsurance is Ownable {
     function shiftTemperatures(
         Insurance memory _insurance,
         uint8 _newTemperature
-    ) public pure {
+    ) public pure returns (Insurance memory) {
         _insurance.temperature.day1 = _insurance.temperature.day2;
         _insurance.temperature.day2 = _insurance.temperature.day3;
         _insurance.temperature.day3 = _insurance.temperature.day4;
         _insurance.temperature.day4 = _insurance.temperature.day5;
         _insurance.temperature.day5 = _newTemperature;
+        return _insurance;
     }
 
     //TODO make private after testing
