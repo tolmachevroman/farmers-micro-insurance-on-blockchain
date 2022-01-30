@@ -16,15 +16,23 @@ contract WeatherInsurance is Ownable {
     uint256 public constant MINIMUM_PREMIUM = 1e17;
 
     // 40 degrees Celcius or more during 5 days in a row triggers settlement payment
-    uint256 public constant TEMPERATURE_THRESHOLD = 40;
+    uint8 public constant TEMPERATURE_THRESHOLD = 40;
 
     mapping(address => bool) public activeInsurances; //TODO make private after testing
     Insurance[] public insurances; //TODO make private after testing
 
     struct Insurance {
         address insuree;
-        uint256[5] temperatureInThelastFiveDays;
+        Temperature temperature;
         uint256 premium;
+    }
+
+    struct Temperature {
+        uint8 day1;
+        uint8 day2;
+        uint8 day3;
+        uint8 day4;
+        uint8 day5;
     }
 
     event SettlementPaid(uint256 _amount, address _to);
@@ -36,38 +44,36 @@ contract WeatherInsurance is Ownable {
         );
     }
 
-    function buyInsurance() public payable {
+    function buyInsurance(address _insuree, uint256 _premium) public payable {
         require(
-            activeInsurances[msg.sender] == false,
+            activeInsurances[_insuree] == false,
             "Client already has an active policy"
         );
-        require(msg.value >= MINIMUM_PREMIUM, "Premium value is too low");
+        require(_premium >= MINIMUM_PREMIUM, "Premium value is too low");
+
+        Temperature memory temperature;
 
         Insurance memory newInsurance;
-        newInsurance.insuree = msg.sender;
-        newInsurance.premium = msg.value;
+        newInsurance.insuree = _insuree;
+        newInsurance.premium = _premium;
+        newInsurance.temperature = temperature;
 
-        activeInsurances[msg.sender] = true;
+        activeInsurances[_insuree] = true;
         insurances.push(newInsurance);
         console.log(
             "Adding a new insurance: %s with premium of: %s",
             newInsurance.insuree,
             newInsurance.premium
         );
-
     }
 
-    function updateTemperature(uint256 _newTemperature)
-        public
-        payable
-        onlyOwner
-    {
+    function updateTemperature(uint8 _newTemperature) public payable onlyOwner {
         // update last temperature in all insurances
         for (uint256 i = 0; i < insurances.length; i++) {
             Insurance memory insurance = insurances[i];
 
             //shift the array and add new temperature to the end
-            shiftTemperatureArray(insurance, _newTemperature);
+            shiftTemperatures(insurance, _newTemperature);
 
             //check whether new temperature triggers settlement payment for this insurance
             if (shouldPaySettlement(insurance)) {
@@ -81,19 +87,15 @@ contract WeatherInsurance is Ownable {
     }
 
     //TODO make private after testing
-    function shiftTemperatureArray(
+    function shiftTemperatures(
         Insurance memory _insurance,
-        uint256 _newTemperature
+        uint8 _newTemperature
     ) public pure {
-        _insurance.temperatureInThelastFiveDays[0] = _insurance
-            .temperatureInThelastFiveDays[1];
-        _insurance.temperatureInThelastFiveDays[1] = _insurance
-            .temperatureInThelastFiveDays[2];
-        _insurance.temperatureInThelastFiveDays[2] = _insurance
-            .temperatureInThelastFiveDays[3];
-        _insurance.temperatureInThelastFiveDays[3] = _insurance
-            .temperatureInThelastFiveDays[4];
-        _insurance.temperatureInThelastFiveDays[4] = _newTemperature;
+        _insurance.temperature.day1 = _insurance.temperature.day2;
+        _insurance.temperature.day2 = _insurance.temperature.day3;
+        _insurance.temperature.day3 = _insurance.temperature.day4;
+        _insurance.temperature.day4 = _insurance.temperature.day5;
+        _insurance.temperature.day5 = _newTemperature;
     }
 
     //TODO make private after testing
@@ -102,17 +104,13 @@ contract WeatherInsurance is Ownable {
         pure
         returns (bool)
     {
-        bool isMoreThanThreshold = true;
-        for (
-            uint256 i = 0;
-            i < _insurance.temperatureInThelastFiveDays.length;
-            i++
-        ) {
-            isMoreThanThreshold =
-                isMoreThanThreshold &&
-                _insurance.temperatureInThelastFiveDays[i] >=
-                TEMPERATURE_THRESHOLD;
-        }
+        bool isMoreThanThreshold = _insurance.temperature.day1 >=
+            TEMPERATURE_THRESHOLD &&
+            _insurance.temperature.day2 >= TEMPERATURE_THRESHOLD &&
+            _insurance.temperature.day3 >= TEMPERATURE_THRESHOLD &&
+            _insurance.temperature.day4 >= TEMPERATURE_THRESHOLD &&
+            _insurance.temperature.day5 >= TEMPERATURE_THRESHOLD;
+
         return isMoreThanThreshold;
     }
 
