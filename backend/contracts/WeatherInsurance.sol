@@ -39,8 +39,9 @@ contract WeatherInsurance is Ownable {
 
     constructor() payable {
         console.log(
-            "Deploying a WeatherInsurance contract with initial balance of:",
-            msg.value
+            "Deploying a WeatherInsurance contract with initial balance of %s and owned by %s",
+            msg.value,
+            msg.sender
         );
     }
 
@@ -69,16 +70,17 @@ contract WeatherInsurance is Ownable {
         return newInsurance;
     }
 
-    function buyInsurance(address _insuree, uint256 _premium) public payable {
+    function buyInsurance() public payable {
+        address payable _insuree = payable(msg.sender);
         require(
             activeInsurances[_insuree] == false,
             "Client already has an active policy"
         );
-        require(_premium >= MINIMUM_PREMIUM, "Premium value is too low");
+        require(msg.value >= MINIMUM_PREMIUM, "Premium value is too low");
 
         Insurance memory newInsurance = createInsurance(
             _insuree,
-            _premium,
+            msg.value,
             0,
             0,
             0,
@@ -117,6 +119,7 @@ contract WeatherInsurance is Ownable {
         }
     }
 
+    //TODO make private after testing
     function shiftTemperatures(
         Insurance memory _insurance,
         uint8 _newTemperature
@@ -155,6 +158,7 @@ contract WeatherInsurance is Ownable {
 
         (bool sent, ) = addressToPay.call{value: settlementToPay}("");
         require(sent, "Failed to send Ether");
+        console.log("Sent %s wei to %s", settlementToPay, addressToPay);
 
         emit SettlementPaid(settlementToPay, addressToPay);
     }

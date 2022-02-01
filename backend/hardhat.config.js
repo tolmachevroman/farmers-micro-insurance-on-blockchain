@@ -15,4 +15,11 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  */
 module.exports = {
   solidity: "0.8.0",
+  networks: {
+    hardhat: {
+      accounts: {
+        accountsBalance: "100000000000000000000", // 100 eth for each account
+      },
+    },
+  },
 };
