@@ -87,7 +87,7 @@ describe("Weather Insurance", function () {
   });
 
   it("Should pay settlement", async function () {
-    const value = ethers.utils.parseUnits("10.0", "ether"); //10 eth as initial value
+    const value = ethers.utils.parseUnits("10.0", "ether");
     const weatherInsurance = await deployContract(value);
 
     const premium = ethers.utils.parseEther("1.0");
@@ -190,5 +190,3 @@ describe("Weather Insurance contract user", function () {
     ).to.be.revertedWith("Client already has an active policy");
   });
 });
-
-// TODO test overall functionality with several accounts
