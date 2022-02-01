@@ -8,6 +8,16 @@ import {
   getCurrentWalletConnected,
 } from "./util/interact.js";
 
+// Expected functionality:
+// 1. Connect to the web using Metamask and a fake hardhat account
+// 2. Buy an insurance
+// 3. Show all insurances on the web
+// 4. Have a button to update temperature, or maybe a script
+// 5. Repeat 1 and 2 for several accounts
+// 6. Have 8 insurances, created in different time regarding temperature update
+// 7. Show all the temperatures on the web
+// 8. Show when settlement is paid and insurane is closed
+
 import alchemylogo from "./logo.svg";
 
 const WeatherInsurance = () => {
@@ -19,13 +29,13 @@ const WeatherInsurance = () => {
 
   //   //called only once
   useEffect(async () => {
-    //   const message = await loadCurrentMessage();
-    //   setMessage(message);
-    //   addSmartContractListener();
-    //   const { address, status } = await getCurrentWalletConnected();
-    //   setWallet(address);
-    //   setStatus(status);
-    //   addWalletListener();
+    const message = await loadCurrentMessage();
+    setMessage(message);
+    addSmartContractListener();
+    const { address, status } = await getCurrentWalletConnected();
+    setWallet(address);
+    setStatus(status);
+    addWalletListener();
   }, []);
 
   function addSmartContractListener() {
@@ -66,14 +76,14 @@ const WeatherInsurance = () => {
   }
 
   const connectWalletPressed = async () => {
-    //   const walletResponse = await connectWallet();
-    //   setStatus(walletResponse.status);
-    //   setWallet(walletResponse.address);
+    const walletResponse = await connectWallet();
+    setStatus(walletResponse.status);
+    setWallet(walletResponse.address);
   };
 
   const onUpdatePressed = async () => {
-    //   const { status } = await updateMessage(walletAddress, newMessage);
-    //   setStatus(status);
+    const { status } = await updateMessage(walletAddress, newMessage);
+    setStatus(status);
   };
 
   //the UI of our component
