@@ -16,3 +16,4 @@ yarn-error.log*
 
 /artifacts
 /cache
+/data
