@@ -1,10 +1,8 @@
-import React from "react";
 import { useEffect, useState } from "react";
 import {
   weatherInsuranceContract,
   connectWallet,
-  updateMessage,
-  loadCurrentMessage,
+  buyInsurance,
   getCurrentWalletConnected,
 } from "./util/interact.js";
 
@@ -20,17 +18,21 @@ import {
 
 import alchemylogo from "./logo.svg";
 
+const { ethers } = require("ethers");
+
 const WeatherInsurance = () => {
   //state variables
   const [walletAddress, setWallet] = useState("");
   const [status, setStatus] = useState("");
-  const [message, setMessage] = useState("No connection to the network."); //default message
-  const [newMessage, setNewMessage] = useState("");
+  const [temperature, setTemperature] = useState(
+    "Use the form below to update temperature"
+  ); //default message
+  // const [newMessage, setNewMessage] = useState("");
 
   //   //called only once
   useEffect(async () => {
-    const message = await loadCurrentMessage();
-    setMessage(message);
+    // const message = await loadCurrentMessage();
+    // setMessage(message);
     addSmartContractListener();
     const { address, status } = await getCurrentWalletConnected();
     setWallet(address);
@@ -39,15 +41,19 @@ const WeatherInsurance = () => {
   }, []);
 
   function addSmartContractListener() {
-    weatherInsuranceContract.events.UpdatedMessages({}, (error, data) => {
-      if (error) {
-        setStatus("😥 " + error.message);
-      } else {
-        setMessage(data.returnValues[1]);
-        setNewMessage("");
-        setStatus("🎉 Your message has been updated!");
-      }
+    weatherInsuranceContract.on("SettlementPaid", (from, to, amount, event) => {
+      console.log(`${from} sent ${ethers.formatEther(amount)} to ${to}`);
     });
+
+    // weatherInsuranceContract.events.UpdatedMessages({}, (error, data) => {
+    //   if (error) {
+    //     setStatus("😥 " + error.message);
+    //   } else {
+    //     // setMessage(data.returnValues[1]);
+    //     // setNewMessage("");
+    //     setStatus("🎉 Your message has been updated!");
+    //   }
+    // });
   }
 
   function addWalletListener() {
@@ -81,8 +87,13 @@ const WeatherInsurance = () => {
     setWallet(walletResponse.address);
   };
 
-  const onUpdatePressed = async () => {
-    const { status } = await updateMessage(walletAddress, newMessage);
+  const onBuyInsurancePressed = async () => {
+    const { status } = await buyInsurance();
+    setStatus(status);
+  };
+
+  const onUpdateTemperaturePressed = async () => {
+    const { status } = await buyInsurance();
     setStatus(status);
   };
 
@@ -101,22 +112,25 @@ const WeatherInsurance = () => {
         )}
       </button>
 
-      <h2 style={{ paddingTop: "50px" }}>Current Message:</h2>
-      <p>{message}</p>
+      <h2 style={{ paddingTop: "18px" }}>Buy an Insurance:</h2>
+      <div>
+        <button id="buyInsurance" onClick={onBuyInsurancePressed}>
+          Buy Insurance
+        </button>
+      </div>
 
-      <h2 style={{ paddingTop: "18px" }}>New Message:</h2>
-
+      <h2 style={{ paddingTop: "18px" }}>Send new temperature:</h2>
       <div>
         <input
           type="text"
-          placeholder="Update the message in your smart contract."
-          onChange={(e) => setNewMessage(e.target.value)}
-          value={newMessage}
+          placeholder="Send new temperature to the smart contract."
+          onChange={(e) => setTemperature(e.target.value)}
+          value={temperature}
         />
         <p id="status">{status}</p>
 
-        <button id="publish" onClick={onUpdatePressed}>
-          Update
+        <button id="updateTemperature" onClick={onUpdateTemperaturePressed}>
+          Update temperature
         </button>
       </div>
     </div>

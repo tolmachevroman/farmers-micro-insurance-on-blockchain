@@ -1,18 +1,63 @@
 // require("dotenv").config();
-// const alchemyKey = process.env.REACT_APP_ALCHEMY_KEY;
-// const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
-// const web3 = createAlchemyWeb3(alchemyKey);
+const { ethers } = require("ethers");
+const provider = new ethers.providers.JsonRpcProvider();
 
 const contractABI = require("../contract-abi.json");
-const contractAddress = "0x6f3f635A9762B47954229Ea479b4541eAF402A6A";
+const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
-export const weatherInsuranceContract = new web3.eth.Contract(
+export const weatherInsuranceContract = new ethers.Contract(
+  contractAddress,
   contractABI,
-  contractAddress
+  provider
 );
 
-export const loadCurrentMessage = async () => {
-  const message = await weatherInsuranceContract.methods.message().call();
+export const buyInsurance = async (address) => {
+  //input error handling
+  if (!window.ethereum || address === null) {
+    return {
+      status:
+        "💡 Connect your Metamask wallet to update the message on the blockchain.",
+    };
+  }
+
+  //set up transaction parameters
+  const transactionParameters = {
+    to: contractAddress, // Required except during contract publications.
+    from: address, // must match user's active address.
+    data: weatherInsuranceContract.buyInsurance(),
+  };
+
+  //sign the transaction
+  try {
+    const txHash = await window.ethereum.request({
+      method: "eth_sendTransaction",
+      params: [transactionParameters],
+    });
+    return {
+      status: (
+        <span>
+          ✅{" "}
+          <a target="_blank" href={`https://ropsten.etherscan.io/tx/${txHash}`}>
+            View the status of your transaction on Etherscan!
+          </a>
+          <br />
+          ℹ️ Once the transaction is verified by the network, the message will
+          be updated automatically.
+        </span>
+      ),
+    };
+  } catch (error) {
+    return {
+      status: "😥 " + error.message,
+    };
+  }
+};
+
+export const updateTemperature = async (newTemperature) => {
+  const message = await weatherInsuranceContract.updateTemperature(
+    newTemperature
+  );
+  console.log(message);
   return message;
 };
 
