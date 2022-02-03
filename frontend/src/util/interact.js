@@ -4,7 +4,7 @@ const { ethers } = require("ethers");
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 
 const contractABI = require("../contract-abi.json");
-const contractAddress = "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0";
+const contractAddress = "0x59b670e9fA9D0A427751Af201D676719a970857b";
 
 export const weatherInsuranceContract = new ethers.Contract(
   contractAddress,
@@ -25,7 +25,7 @@ export const buyInsurance = async (address, premiumInEthers) => {
   try {
     await window.ethereum.request({ method: "eth_requestAccounts" });
 
-    const premium = ethers.utils.parseUnits(premiumInEthers, 18);
+    const premium = ethers.utils.parseUnits(premiumInEthers, "ether");
 
     const signer = provider.getSigner();
     const contractAlice = weatherInsuranceContract.connect(signer);

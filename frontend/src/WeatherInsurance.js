@@ -35,19 +35,11 @@ const WeatherInsurance = () => {
   }, []);
 
   async function addSmartContractListener() {
-    weatherInsuranceContract.on("SettlementPaid", (from, to, amount, event) => {
-      console.log(`${from} sent ${ethers.formatEther(amount)} to ${to}`);
+    weatherInsuranceContract.on("SettlementPaid", (amount, to, data, _) => {
+      const value = ethers.utils.formatEther(amount);
+      console.log("Settlement paid: %s ETH to ", value, to);
     });
-
-    // weatherInsuranceContract.events.UpdatedMessages({}, (error, data) => {
-    //   if (error) {
-    //     setStatus("😥 " + error.message);
-    //   } else {
-    //     // setMessage(data.returnValues[1]);
-    //     // setNewMessage("");
-    //     setStatus("🎉 Your message has been updated!");
-    //   }
-    // });
+    //TODO set status
   }
 
   async function addWalletListener() {
