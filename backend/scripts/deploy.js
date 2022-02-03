@@ -6,27 +6,32 @@
 const hre = require("hardhat");
 
 async function main() {
-    // Hardhat always runs the compile task when running scripts with its command
-    // line interface.
-    //
-    // If this script is run directly using `node` you may want to call compile
-    // manually to make sure everything is compiled
-    // await hre.run('compile');
+  // Hardhat always runs the compile task when running scripts with its command
+  // line interface.
+  //
+  // If this script is run directly using `node` you may want to call compile
+  // manually to make sure everything is compiled
+  // await hre.run('compile');
 
-    // We get the contract to deploy
-    const WeatherInsurance = await hre.ethers.getContractFactory("WeatherInsurance");
-    const weatherInsurance = await WeatherInsurance.deploy({ value: 1e9 });
+  // We get the contract to deploy
+  const initialBalance = ethers.utils.parseEther("10.0");
+  const WeatherInsurance = await hre.ethers.getContractFactory(
+    "WeatherInsurance"
+  );
+  const weatherInsurance = await WeatherInsurance.deploy({
+    value: initialBalance,
+  });
 
-    await weatherInsurance.deployed();
+  await weatherInsurance.deployed();
 
-    console.log("WeatherInsurance deployed to:", weatherInsurance.address);
+  console.log("WeatherInsurance deployed to:", weatherInsurance.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error(error);
-        process.exit(1);
-    });
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
