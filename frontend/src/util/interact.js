@@ -1,9 +1,10 @@
 // require("dotenv").config();
 const { ethers } = require("ethers");
-const provider = new ethers.providers.JsonRpcProvider();
+
+const provider = new ethers.providers.Web3Provider(window.ethereum);
 
 const contractABI = require("../contract-abi.json");
-const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const contractAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
 
 export const weatherInsuranceContract = new ethers.Contract(
   contractAddress,
@@ -53,12 +54,45 @@ export const buyInsurance = async (address) => {
   }
 };
 
-export const updateTemperature = async (newTemperature) => {
-  const message = await weatherInsuranceContract.updateTemperature(
-    newTemperature
-  );
-  console.log(message);
-  return message;
+export const updateTemperature = async (address, newTemperature) => {
+  //input error handling
+  if (!window.ethereum || address === null) {
+    return {
+      status:
+        "💡 Connect your Metamask wallet to update the message on the blockchain.",
+    };
+  }
+
+  if (newTemperature.trim() === "") {
+    return {
+      status: "❌ Your temperature cannot be an empty string.",
+    };
+  }
+
+  //sign the transaction
+  try {
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+
+    const signer = provider.getSigner();
+    const contractAlice = weatherInsuranceContract.connect(signer);
+    const tx = await contractAlice.updateTemperature(newTemperature);
+    const result = await tx.wait();
+
+    console.log(result);
+
+    return {
+      status: (
+        <span>
+          ✅ Sent successfully!
+          <p>Transaction hash: {result.transactionHash}</p>
+        </span>
+      ),
+    };
+  } catch (error) {
+    return {
+      status: "😥 " + error.message,
+    };
+  }
 };
 
 export const connectWallet = async () => {
@@ -135,53 +169,6 @@ export const getCurrentWalletConnected = async () => {
           </p>
         </span>
       ),
-    };
-  }
-};
-
-export const updateMessage = async (address, message) => {
-  //input error handling
-  if (!window.ethereum || address === null) {
-    return {
-      status:
-        "💡 Connect your Metamask wallet to update the message on the blockchain.",
-    };
-  }
-
-  if (message.trim() === "") {
-    return {
-      status: "❌ Your message cannot be an empty string.",
-    };
-  }
-  //set up transaction parameters
-  const transactionParameters = {
-    to: contractAddress, // Required except during contract publications.
-    from: address, // must match user's active address.
-    data: weatherInsuranceContract.methods.update(message).encodeABI(),
-  };
-
-  //sign the transaction
-  try {
-    const txHash = await window.ethereum.request({
-      method: "eth_sendTransaction",
-      params: [transactionParameters],
-    });
-    return {
-      status: (
-        <span>
-          ✅{" "}
-          <a target="_blank" href={`https://ropsten.etherscan.io/tx/${txHash}`}>
-            View the status of your transaction on Etherscan!
-          </a>
-          <br />
-          ℹ️ Once the transaction is verified by the network, the message will
-          be updated automatically.
-        </span>
-      ),
-    };
-  } catch (error) {
-    return {
-      status: "😥 " + error.message,
     };
   }
 };

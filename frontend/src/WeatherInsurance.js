@@ -4,6 +4,7 @@ import {
   connectWallet,
   buyInsurance,
   getCurrentWalletConnected,
+  updateTemperature,
 } from "./util/interact.js";
 
 // Expected functionality:
@@ -24,9 +25,7 @@ const WeatherInsurance = () => {
   //state variables
   const [walletAddress, setWallet] = useState("");
   const [status, setStatus] = useState("");
-  const [temperature, setTemperature] = useState(
-    "Use the form below to update temperature"
-  ); //default message
+  const [temperature, setTemperature] = useState("25"); //default message
   // const [newMessage, setNewMessage] = useState("");
 
   //   //called only once
@@ -93,7 +92,7 @@ const WeatherInsurance = () => {
   };
 
   const onUpdateTemperaturePressed = async () => {
-    const { status } = await buyInsurance();
+    const { status } = await updateTemperature(walletAddress, temperature);
     setStatus(status);
   };
 
@@ -127,7 +126,7 @@ const WeatherInsurance = () => {
           onChange={(e) => setTemperature(e.target.value)}
           value={temperature}
         />
-        <p id="status">{status}</p>
+        <div id="status">{status}</div>
 
         <button id="updateTemperature" onClick={onUpdateTemperaturePressed}>
           Update temperature
