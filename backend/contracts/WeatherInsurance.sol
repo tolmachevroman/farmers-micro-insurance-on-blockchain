@@ -98,6 +98,7 @@ contract WeatherInsurance is Ownable {
     }
 
     function updateTemperature(uint8 _newTemperature) public payable onlyOwner {
+        console.log("Updating temperature with value of: %s", _newTemperature);
         // update last temperature in all insurances
         for (uint256 i = 0; i < insurances.length; i++) {
             //shift the temperatures and add new temperature to the end
@@ -153,6 +154,7 @@ contract WeatherInsurance is Ownable {
         payable
         onlyOwner
     {
+        console.log("About to pay settlement to %s", _insurance.insuree);
         uint256 settlementToPay = SETTLEMENT_MULTIPLIER * _insurance.premium;
         address addressToPay = _insurance.insuree;
 
