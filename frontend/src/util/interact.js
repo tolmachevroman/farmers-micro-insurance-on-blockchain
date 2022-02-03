@@ -4,7 +4,7 @@ const { ethers } = require("ethers");
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 
 const contractABI = require("../contract-abi.json");
-const contractAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+const contractAddress = "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0";
 
 export const weatherInsuranceContract = new ethers.Contract(
   contractAddress,
@@ -106,48 +106,6 @@ export const connectWallet = async () => {
         address: addressArray[0],
       };
       return obj;
-    } catch (err) {
-      return {
-        address: "",
-        status: "😥 " + err.message,
-      };
-    }
-  } else {
-    return {
-      address: "",
-      status: (
-        <span>
-          <p>
-            {" "}
-            🦊{" "}
-            <a target="_blank" href={`https://metamask.io/download.html`}>
-              You must install Metamask, a virtual Ethereum wallet, in your
-              browser.
-            </a>
-          </p>
-        </span>
-      ),
-    };
-  }
-};
-
-export const getCurrentWalletConnected = async () => {
-  if (window.ethereum) {
-    try {
-      const addressArray = await window.ethereum.request({
-        method: "eth_accounts",
-      });
-      if (addressArray.length > 0) {
-        return {
-          address: addressArray[0],
-          status: "👆🏽 Write a message in the text-field above.",
-        };
-      } else {
-        return {
-          address: "",
-          status: "🦊 Connect to Metamask using the top right button.",
-        };
-      }
     } catch (err) {
       return {
         address: "",

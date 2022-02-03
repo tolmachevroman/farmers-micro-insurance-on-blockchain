@@ -3,7 +3,6 @@ import {
   weatherInsuranceContract,
   connectWallet,
   buyInsurance,
-  getCurrentWalletConnected,
   updateTemperature,
 } from "./util/interact.js";
 
@@ -28,18 +27,14 @@ const WeatherInsurance = () => {
   const [temperature, setTemperature] = useState("25"); //default message
   // const [newMessage, setNewMessage] = useState("");
 
-  //   //called only once
-  useEffect(async () => {
-    // const message = await loadCurrentMessage();
-    // setMessage(message);
+  //called only once
+  useEffect(() => {
     addSmartContractListener();
-    const { address, status } = await getCurrentWalletConnected();
-    setWallet(address);
-    setStatus(status);
+    getCurrentWalletConnected();
     addWalletListener();
   }, []);
 
-  function addSmartContractListener() {
+  async function addSmartContractListener() {
     weatherInsuranceContract.on("SettlementPaid", (from, to, amount, event) => {
       console.log(`${from} sent ${ethers.formatEther(amount)} to ${to}`);
     });
@@ -55,12 +50,12 @@ const WeatherInsurance = () => {
     // });
   }
 
-  function addWalletListener() {
+  async function addWalletListener() {
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", (accounts) => {
         if (accounts.length > 0) {
           setWallet(accounts[0]);
-          setStatus("👆🏽 Write a message in the text-field above.");
+          setStatus("🌡️ Set new temperature in the text-field above.");
         } else {
           setWallet("");
           setStatus("🦊 Connect to Metamask using the top right button.");
@@ -76,6 +71,40 @@ const WeatherInsurance = () => {
             browser.
           </a>
         </p>
+      );
+    }
+  }
+
+  async function getCurrentWalletConnected() {
+    if (window.ethereum) {
+      try {
+        const addressArray = await window.ethereum.request({
+          method: "eth_accounts",
+        });
+        if (addressArray.length > 0) {
+          setWallet(addressArray[0]);
+          setStatus("🌡️ Set new temperature in the text-field above.");
+        } else {
+          setWallet("");
+          setStatus("🦊 Connect to Metamask using the top right button..");
+        }
+      } catch (err) {
+        setWallet("");
+        setStatus("😥 " + err.message);
+      }
+    } else {
+      setWallet("");
+      setStatus(
+        <span>
+          <p>
+            {" "}
+            🦊{" "}
+            <a target="_blank" href={`https://metamask.io/download.html`}>
+              You must install Metamask, a virtual Ethereum wallet, in your
+              browser.
+            </a>
+          </p>
+        </span>
       );
     }
   }
@@ -122,7 +151,6 @@ const WeatherInsurance = () => {
       <div>
         <input
           type="text"
-          placeholder="Send new temperature to the smart contract."
           onChange={(e) => setTemperature(e.target.value)}
           value={temperature}
         />
