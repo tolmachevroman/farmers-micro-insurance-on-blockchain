@@ -18,6 +18,7 @@ module.exports = {
   solidity: "0.8.0",
   networks: {
     hardhat: {
+      chainId: 1337,
       accounts: {
         accountsBalance: "100000000000000000000", // 100 eth for each account
       },
