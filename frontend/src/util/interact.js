@@ -43,9 +43,8 @@ export const buyInsurance = async (address, premiumInEthers) => {
       ),
     };
   } catch (error) {
-    console.log(error.data);
     return {
-      status: "😥 " + error.data.message,
+      status: "⛔ " + error.data.message,
     };
   }
 };
@@ -86,7 +85,7 @@ export const updateTemperature = async (address, newTemperature) => {
     };
   } catch (error) {
     return {
-      status: "😥 " + error.message,
+      status: "⛔ " + error.data.message,
     };
   }
 };
