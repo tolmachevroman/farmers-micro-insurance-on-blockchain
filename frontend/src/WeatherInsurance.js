@@ -25,7 +25,7 @@ const WeatherInsurance = () => {
   const [walletAddress, setWallet] = useState("");
   const [status, setStatus] = useState("");
   const [temperature, setTemperature] = useState("25"); //default message
-  // const [newMessage, setNewMessage] = useState("");
+  const [premiumInEthers, setPremiumInEthers] = useState("0.2");
 
   //called only once
   useEffect(() => {
@@ -116,7 +116,7 @@ const WeatherInsurance = () => {
   };
 
   const onBuyInsurancePressed = async () => {
-    const { status } = await buyInsurance();
+    const { status } = await buyInsurance(walletAddress, premiumInEthers);
     setStatus(status);
   };
 
@@ -142,6 +142,13 @@ const WeatherInsurance = () => {
 
       <h2 style={{ paddingTop: "18px" }}>Buy an Insurance:</h2>
       <div>
+        <input
+          type="text"
+          placeholder="Value in Ethers"
+          onChange={(e) => setPremiumInEthers(e.target.value)}
+          value={premiumInEthers}
+        />
+
         <button id="buyInsurance" onClick={onBuyInsurancePressed}>
           Buy Insurance
         </button>
@@ -154,11 +161,15 @@ const WeatherInsurance = () => {
           onChange={(e) => setTemperature(e.target.value)}
           value={temperature}
         />
-        <div id="status">{status}</div>
 
         <button id="updateTemperature" onClick={onUpdateTemperaturePressed}>
           Update temperature
         </button>
+      </div>
+
+      <div>
+        <h2>Status:</h2>
+        <div id="status">{status}</div>
       </div>
     </div>
   );

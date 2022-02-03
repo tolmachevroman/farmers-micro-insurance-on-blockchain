@@ -12,7 +12,7 @@ export const weatherInsuranceContract = new ethers.Contract(
   provider
 );
 
-export const buyInsurance = async (address) => {
+export const buyInsurance = async (address, premiumInEthers) => {
   //input error handling
   if (!window.ethereum || address === null) {
     return {
@@ -21,35 +21,31 @@ export const buyInsurance = async (address) => {
     };
   }
 
-  //set up transaction parameters
-  const transactionParameters = {
-    to: contractAddress, // Required except during contract publications.
-    from: address, // must match user's active address.
-    data: weatherInsuranceContract.buyInsurance(),
-  };
-
   //sign the transaction
   try {
-    const txHash = await window.ethereum.request({
-      method: "eth_sendTransaction",
-      params: [transactionParameters],
-    });
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+
+    const premium = ethers.utils.parseUnits(premiumInEthers, 18);
+
+    const signer = provider.getSigner();
+    const contractAlice = weatherInsuranceContract.connect(signer);
+    const tx = await contractAlice.buyInsurance({ value: premium });
+    const result = await tx.wait();
+
+    console.log(result);
+
     return {
       status: (
         <span>
-          ✅{" "}
-          <a target="_blank" href={`https://ropsten.etherscan.io/tx/${txHash}`}>
-            View the status of your transaction on Etherscan!
-          </a>
-          <br />
-          ℹ️ Once the transaction is verified by the network, the message will
-          be updated automatically.
+          ✅ Sent successfully!
+          <p>Transaction hash: {result.transactionHash}</p>
         </span>
       ),
     };
   } catch (error) {
+    console.log(error.data);
     return {
-      status: "😥 " + error.message,
+      status: "😥 " + error.data.message,
     };
   }
 };
