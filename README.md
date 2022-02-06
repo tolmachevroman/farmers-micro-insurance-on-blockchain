@@ -28,7 +28,7 @@ Project can be divided in the following sections:
 - [Frontend](#frontend)
   - [Getting started with React](#getting-started-with-react)
   - [Interacting with the backend](#interacting-with-the-backend)
-  - Testing functionality with local Hardhat chain
+  - [Testing functionality with local Hardhat chain](#testing-functionality-with-local-hardhat-chain)
 - Final thoughts and notes
 
 ## Backend
@@ -116,8 +116,8 @@ We don't want to deploy it to public chains, rather, we'll follow the [guide](ht
 We set 10 ETH as the initial balance when [deploying](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/scripts/deploy.js) our contract locally.
 
 ![enter image description here](https://user-images.githubusercontent.com/560815/152700159-54f47900-fa5d-46ff-ba25-bf9f59aab68a.png)
-![enter image description here](https://user-images.githubusercontent.com/560815/152700160-e19d9cf1-c188-4b28-a6f5-6179d483c278.png)
-
+![enter image description here](https://user-images.githubusercontent.com/560815/152703100-13ceb2c1-99d3-4f1c-acea-599fb313290c.png)
+![enter image description here](https://user-images.githubusercontent.com/560815/152703105-3174a70a-0a02-407c-86a7-0a8a639f29b8.png)
 Notice that the contract owner is in fact the first account of the 20 accounts provided by Hardhat.
 
 You may have noticed that in the tests, we [skipped the first signer](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js#L168), and started with Alice and Bob as our clients. And that's because the first signer is just us, the ones deploying the contract. We can have an insurance too, no doubt! But I like to think of the contract owner as a _company_, and of others as _clients_.
@@ -143,3 +143,33 @@ We won't go line by line this time, but take a look at the [WeatherInsurance.js]
 One important point to mention is `WeatherInsurance` contract [address](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/frontend/src/WeatherInsurance.js) on the blockchain you're connected to. You get this address after deploying the contract (see image above, _Contract address_ line). So for me and you these addresses will be different, make sure to update it with your actual contract address.
 
 Notice also that here we have [only one signer](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/frontend/src/util/interact.js#L30), the actual address connected via Metamask.
+
+### Testing functionality with local Hardhat chain
+
+Make sure you have the local Hardhat running and contract deployed. Copy and paste contract address as mentioned above.
+
+Go to the [frontend](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/tree/main/frontend) folder and start the web app. You should see something like this:
+
+![enter image description here](https://user-images.githubusercontent.com/560815/152701710-90ae4d59-91b8-46b9-97db-b0892e1f0e21.png)
+Click on the Metamask icon in your browser, and you'll see your accounts. I have mine connected already. Notice it has less than 100 ETH, that's because I deployed contract using this account and spent 10 ETH as the initial balance:
+![enter image description here](https://user-images.githubusercontent.com/560815/152701733-936534a5-696b-48e7-824e-9e72eabfbaa6.png)
+When testing with Hardhat local chain, it's useful to import several Hardhat accounts to your Metamask and switch between them to test for different users:
+![enter image description here](https://user-images.githubusercontent.com/560815/152701797-728c5d72-eb83-4a07-9aeb-716bb40dcc22.png)
+Specify a premium, say 0.3 ETH, and try to buy an insurance. Metamask will ask you to confirm the transaction. Notice that section on top of the Metamask window: your currently connected account is interacting with contract address on a localhost:8545.
+![enter image description here](https://user-images.githubusercontent.com/560815/152703241-10008888-4347-4899-9691-36663fe4be1c.png)
+If transaction has been successful, you'll see message in the web app and also in terminal running the blockchain:
+![enter image description here](https://user-images.githubusercontent.com/560815/152703245-6d57c437-a3a7-4924-a9a3-9dfcff2b4566.png)
+
+Now let's try to update temperature:
+![enter image description here](https://user-images.githubusercontent.com/560815/152703534-cbe6f63d-20f5-4565-958a-cdaddc914bc4.png)
+Again, you'll see messages in web app and terminal:
+![enter image description here](https://user-images.githubusercontent.com/560815/152703537-c538b8ce-144c-4101-b3f1-8a82f6d031af.png)
+Let's do it several times in a row with values above 41 degrees. After you do it 5 times, you'll get paid your premium times multiplier (0.3 ETH times 3 = 0.9 ETH), and your insurance closed.
+![enter image description here](https://user-images.githubusercontent.com/560815/152703735-dbc7ee49-d748-4a48-a15a-bd29fe3c4e1d.png)
+![enter image description here](https://user-images.githubusercontent.com/560815/152703741-9ba042e0-8c99-4f97-92dd-cf0f2598879c.png)
+
+Here's a small video 🎥 of the whole process:
+
+[video]
+
+FYI, I've run into a problem with "Nonce too high" after restarting the local Hardhat chain. Here's the [solution](https://medium.com/@thelasthash/solved-nonce-too-high-error-with-metamask-and-hardhat-adc66f092cd) 🔧if you run into the same issue.
