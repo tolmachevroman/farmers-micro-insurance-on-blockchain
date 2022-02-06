@@ -23,8 +23,8 @@ Project can be divided in the following sections:
   - [Contract general overview](#contract-general-overview)
   - [Contract implementation](#contract-implementation)
   - [Testing the contract](#testing-the-contract)
-  - Hardhat config file
-  - Deploying and local Hardhat chain
+  - [Hardhat config file](#hardhat-config-file)
+  - [Deploying and local Hardhat chain](#deploying-and-local-hardhat-chain)
 - Frontend
   - Getting started with React
   - Interacting with EVM blockchains
@@ -100,3 +100,26 @@ Let's go through the [weather-insurance-test.js](https://github.com/tolmachevrom
 [Lines 138-162](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js#L138-L162) Make sure temperatures get updated for multiple insurances.
 
 [Lines 164-191](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js#L164-L191) Make sure clients can have one and only one insurance, bought at a price greater than the minimum specified.
+
+### Hardhat config file
+
+While working with Hardhat you'll eventually need to specify this or that parameter, add some dependency. Hardhat uses a special [config file](https://hardhat.org/config/#available-config-options) for that.
+
+Let's take a look at our [hardhat.config.js](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/hardhat.config.js) file. We added [hardhat-abi-exporter](https://www.npmjs.com/package/hardhat-abi-exporter) to have a `.abi` file every time contract is compiled. This file is a kind of an interface to our contract and required on the frontend side.
+
+Another point to mention is Hardhat local chain. We set `chainId` to 1337 to make it visible to Metamask, a popular cryptowallet we'll use later. Also, we set initial balance of fake accounts to 100 ETH.
+
+### Deploying and local Hardhat chain
+
+As was mentioned earlier, you can deploy your contract to a local blockchain, or to public blockchains. Popular public test blockchains are [Rinkeby](https://rinkeby.etherscan.io/) and [Ropsten](https://ropsten.etherscan.io/), and of course you can deploy to the [Ethereum mainnet](https://etherscan.io/).
+
+We don't want to deploy it to public chains, rather, we'll follow the [guide](https://hardhat.org/guides/deploying.html#deploying-your-contracts) and deploy it to a local standalone Hardhat chain.
+
+We'll set 10 ETH as the initial balance when [deploying](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/scripts/deploy.js) our contract locally.
+
+![enter image description here](https://user-images.githubusercontent.com/560815/152700159-54f47900-fa5d-46ff-ba25-bf9f59aab68a.png)
+![enter image description here](https://user-images.githubusercontent.com/560815/152700160-e19d9cf1-c188-4b28-a6f5-6179d483c278.png)
+
+Notice that the contract owner is in fact the first account of the 20 accounts provided by Hardhat.
+
+You may have noticed that in the tests, we [skipped the first signer](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js#L168), and started with Alice and Bob as our clients. And that's because the first signer is just us, the ones deploying the contract. We can have an insurance too, no doubt! But I like to think of the contract owner as a _company_, and of others as _clients_.
