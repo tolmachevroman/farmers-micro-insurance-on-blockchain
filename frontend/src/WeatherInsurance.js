@@ -17,20 +17,16 @@ const WeatherInsurance = () => {
 
   //called only once
   useEffect(() => {
-    addSmartContractListener();
     getCurrentWalletConnected();
+    addSmartContractListener();
     addWalletListener();
   }, []);
 
   async function addSmartContractListener() {
     weatherInsuranceContract.on("SettlementPaid", (amount, to, data, _) => {
       const value = ethers.utils.formatEther(amount);
-      const message =
-        "💰 Settlement paid: " +
-        value +
-        " ETH to " +
-        to +
-        "\n  You can buy another insurance again!";
+      const message = "💰 Settlement paid: " + value + " ETH to " + to;
+
       console.log("Settlement paid: %s ETH to ", value, to);
       setStatus(message);
     });
