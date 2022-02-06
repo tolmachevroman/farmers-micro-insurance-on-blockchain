@@ -126,7 +126,7 @@ const WeatherInsurance = () => {
       <p>
         You buy an insurance with the premium you specify, minimum value of 0.1
         ETH. System updates temperature. It could be an external provider like
-        an Oracle updating in every day or we can manually send temperature
+        an Oracle updating it every day or we can manually send temperature
         updates.
       </p>
       <p>
