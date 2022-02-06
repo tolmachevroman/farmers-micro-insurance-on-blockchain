@@ -6,18 +6,6 @@ import {
   updateTemperature,
 } from "./util/interact.js";
 
-// Expected functionality:
-// 1. Connect to the web using Metamask and a fake hardhat account
-// 2. Buy an insurance
-// 3. Show all insurances on the web
-// 4. Have a button to update temperature, or maybe a script
-// 5. Repeat 1 and 2 for several accounts
-// 6. Have 8 insurances, created in different time regarding temperature update
-// 7. Show all the temperatures on the web
-// 8. Show when settlement is paid and insurane is closed
-
-import alchemylogo from "./logo.svg";
-
 const { ethers } = require("ethers");
 
 const WeatherInsurance = () => {
@@ -37,9 +25,15 @@ const WeatherInsurance = () => {
   async function addSmartContractListener() {
     weatherInsuranceContract.on("SettlementPaid", (amount, to, data, _) => {
       const value = ethers.utils.formatEther(amount);
+      const message =
+        "💰 Settlement paid: " +
+        value +
+        " ETH to " +
+        to +
+        "\n  You can buy another insurance again!";
       console.log("Settlement paid: %s ETH to ", value, to);
+      setStatus(message);
     });
-    //TODO set status
   }
 
   async function addWalletListener() {
@@ -82,7 +76,7 @@ const WeatherInsurance = () => {
         }
       } catch (err) {
         setWallet("");
-        setStatus("😥 " + err.message);
+        setStatus("⛔ " + err.message);
       }
     } else {
       setWallet("");
@@ -120,7 +114,6 @@ const WeatherInsurance = () => {
   //the UI of our component
   return (
     <div id="container">
-      <img id="logo" src={alchemylogo}></img>
       <button id="walletButton" onClick={connectWalletPressed}>
         {walletAddress.length > 0 ? (
           "Connected: " +
@@ -132,34 +125,56 @@ const WeatherInsurance = () => {
         )}
       </button>
 
-      <h2 style={{ paddingTop: "18px" }}>Buy an Insurance:</h2>
-      <div>
-        <input
-          type="text"
-          placeholder="Value in Ethers"
-          onChange={(e) => setPremiumInEthers(e.target.value)}
-          value={premiumInEthers}
-        />
+      <h1 style={{ marginTop: "50px" }}>Weather-Based Micro Insurance 🌤️</h1>
+      <h2>How does it work?</h2>
+      <p>
+        You buy an insurance with the premium you specify, minimum value of 0.1
+        ETH. System updates temperature. It could be an external provider like
+        an Oracle updating in every day or we can manually send temperature
+        updates.
+      </p>
+      <p>
+        Smart contract will automatically trigger settlement payments when there
+        are 5 temperature values of 41 degree Celcius or more in a row.
+      </p>
 
-        <button id="buyInsurance" onClick={onBuyInsurancePressed}>
-          Buy Insurance
-        </button>
+      <div className="flexbox-container">
+        <div className="input-button">
+          <h2>Buy an Insurance</h2>
+          <h3>Specify premium of the insurance in ETH:</h3>
+          <div>
+            <input
+              type="text"
+              placeholder="Value in Ethers"
+              onChange={(e) => setPremiumInEthers(e.target.value)}
+              value={premiumInEthers}
+            />
+
+            <button id="buyInsurance" onClick={onBuyInsurancePressed}>
+              Buy Insurance
+            </button>
+          </div>
+        </div>
+
+        <div className="input-button">
+          <h2>Update Temperature</h2>
+          <h3>Specify new temperature in degrees Celsius:</h3>
+          <div>
+            <input
+              type="text"
+              placeholder="Temperature in degrees Celsius"
+              onChange={(e) => setTemperature(e.target.value)}
+              value={temperature}
+            />
+
+            <button id="updateTemperature" onClick={onUpdateTemperaturePressed}>
+              Update temperature
+            </button>
+          </div>
+        </div>
       </div>
 
-      <h2 style={{ paddingTop: "18px" }}>Send new temperature:</h2>
-      <div>
-        <input
-          type="text"
-          onChange={(e) => setTemperature(e.target.value)}
-          value={temperature}
-        />
-
-        <button id="updateTemperature" onClick={onUpdateTemperaturePressed}>
-          Update temperature
-        </button>
-      </div>
-
-      <div>
+      <div style={{ marginTop: "20px" }}>
         <h2>Status:</h2>
         <div id="status">{status}</div>
       </div>
