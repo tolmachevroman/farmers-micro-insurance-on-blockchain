@@ -22,7 +22,7 @@ Project can be divided in the following sections:
   - [Getting started with Hardhat](#getting-started-with-hardhat)
   - [Contract general overview](#contract-general-overview)
   - [Contract implementation](#contract-implementation)
-  - Testing the contract
+  - [Testing the contract](#testing-the-contract)
   - Hardhat config file
   - Deploying and local Hardhat chain
 - Frontend
@@ -80,3 +80,23 @@ Let's go through [the contract](https://github.com/tolmachevroman/farmers-micro-
 [Lines 169-176](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/contracts/WeatherInsurance.sol#L169-L176) `remove()` is a helper method to remove an `Insurance` from the `_insurances` array.
 
 Notice that many methods should be `private` when deploying to a public chain, it's just that in order to test them from Javascript code they should be visible. So in a real-world situation, you would mark them `private` after testing and before deployment.
+
+### Testing the contract
+
+Testing is an essential part of smart contracts development, more so that it's difficult to update a contract once it's deployed. We'll use Ethers and Chai libraries to interact with the contract and test it, respectively.
+
+Let's go through the [weather-insurance-test.js](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js) file.
+
+[Line 4](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js#L4) We refactor contract creation to a separate function, we'll use it everywhere later. Notices that it deploys the contract with 0.1 ETH by default.
+
+[Lines 11-18](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js#L11-L18) Make sure that contract gets deployed with the initial value we specify.
+
+[Lines 20-48](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js#L20-L48) Make sure that temperatures get shifted.
+
+[Lines 50-87](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js#L50-L87) Make sure that payment conditions are triggered.
+
+[Lines 89-136](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js#L89-L136) Make sure that settlement is paid.
+
+[Lines 138-162](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js#L138-L162) Make sure temperatures get updated for multiple insurances.
+
+[Lines 164-191](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js#L164-L191) Make sure clients can have one and only one insurance, bought at a price greater than the minimum specified.
