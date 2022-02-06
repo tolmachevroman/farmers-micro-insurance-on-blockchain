@@ -24,12 +24,10 @@ Project can be divided in the following sections:
   - [Contract implementation](#contract-implementation)
   - [Testing the contract](#testing-the-contract)
   - [Hardhat config file](#hardhat-config-file)
-  - [Deploying and local Hardhat chain](#deploying-and-local-hardhat-chain)
-- Frontend
-  - Getting started with React
-  - Interacting with EVM blockchains
-  - Widget general overview
-  - Widget implementation
+  - [Deploying to local Hardhat chain](#deploying-to-local-hardhat-chain)
+- [Frontend](#frontend)
+  - [Getting started with React](#getting-started-with-react)
+  - [Interacting with the backend](#interacting-with-the-backend)
   - Testing functionality with local Hardhat chain
 - Final thoughts and notes
 
@@ -105,17 +103,17 @@ Let's go through the [weather-insurance-test.js](https://github.com/tolmachevrom
 
 While working with Hardhat you'll eventually need to specify this or that parameter, add some dependency. Hardhat uses a special [config file](https://hardhat.org/config/#available-config-options) for that.
 
-Let's take a look at our [hardhat.config.js](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/hardhat.config.js) file. We added [hardhat-abi-exporter](https://www.npmjs.com/package/hardhat-abi-exporter) to have a `.abi` file every time contract is compiled. This file is a kind of an interface to our contract and required on the frontend side.
+Let's take a look at our [hardhat.config.js](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/hardhat.config.js) file. We added [hardhat-abi-exporter](https://www.npmjs.com/package/hardhat-abi-exporter) to have an ABI `.json` file every time contract is compiled. ABI stands for Application Binary Interface, it is a window to our smart contract and required on the frontend side.
 
 Another point to mention is Hardhat local chain. We set `chainId` to 1337 to make it visible to Metamask, a popular cryptowallet we'll use later. Also, we set initial balance of fake accounts to 100 ETH.
 
-### Deploying and local Hardhat chain
+### Deploying to local Hardhat chain
 
 As was mentioned earlier, you can deploy your contract to a local blockchain, or to public blockchains. Popular public test blockchains are [Rinkeby](https://rinkeby.etherscan.io/) and [Ropsten](https://ropsten.etherscan.io/), and of course you can deploy to the [Ethereum mainnet](https://etherscan.io/).
 
 We don't want to deploy it to public chains, rather, we'll follow the [guide](https://hardhat.org/guides/deploying.html#deploying-your-contracts) and deploy it to a local standalone Hardhat chain.
 
-We'll set 10 ETH as the initial balance when [deploying](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/scripts/deploy.js) our contract locally.
+We set 10 ETH as the initial balance when [deploying](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/scripts/deploy.js) our contract locally.
 
 ![enter image description here](https://user-images.githubusercontent.com/560815/152700159-54f47900-fa5d-46ff-ba25-bf9f59aab68a.png)
 ![enter image description here](https://user-images.githubusercontent.com/560815/152700160-e19d9cf1-c188-4b28-a6f5-6179d483c278.png)
@@ -123,3 +121,25 @@ We'll set 10 ETH as the initial balance when [deploying](https://github.com/tolm
 Notice that the contract owner is in fact the first account of the 20 accounts provided by Hardhat.
 
 You may have noticed that in the tests, we [skipped the first signer](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js#L168), and started with Alice and Bob as our clients. And that's because the first signer is just us, the ones deploying the contract. We can have an insurance too, no doubt! But I like to think of the contract owner as a _company_, and of others as _clients_.
+
+## Frontend
+
+### Getting started with React
+
+We'll create a new React app and add a couple of files, namely a new widget and a helper Javascript file. This is inspired by Alchemy projects, so I again encourage you to check it.
+
+### Interacting with the backend
+
+What do we need in a web app to interact with an Ethereum blockchain? Well, several things: a cryptowallet to manage your money (aka tokens) and connect to a blockchain (not necessarily Ethereum), and a way to call contract methods and get responses.
+
+[Metamask](https://metamask.io/) is a popular wallet, it's installed as a browser extension. You can add multiple accounts there, for multiple blockchains, including a local one!
+
+To get information of what methods are available from your smart contract, you use [contract-abi.json](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/frontend/src/contract-abi.json) file. You get this file automatically after installing the [hardhat-abi-exporter](https://www.npmjs.com/package/hardhat-abi-exporter) in the Hardhat project.
+
+Finally, to tie this all together, you add a couple of callbacks to connect a Metamask wallet, to call smart contract methods and to listen to `SettlementPaid` event.
+
+We won't go line by line this time, but take a look at the [WeatherInsurance.js](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/frontend/src/WeatherInsurance.js) file.
+
+One important point to mention is `WeatherInsurance` contract [address](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/frontend/src/WeatherInsurance.js) on the blockchain you're connected to. You get this address after deploying the contract (see image above, _Contract address_ line). So for me and you these addresses will be different, make sure to update it with your actual contract address.
+
+Notice also that here we have [only one signer](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/frontend/src/util/interact.js#L30), the actual address connected via Metamask.

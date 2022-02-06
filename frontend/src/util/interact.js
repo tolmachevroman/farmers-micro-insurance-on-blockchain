@@ -4,7 +4,7 @@ const { ethers } = require("ethers");
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 
 const contractABI = require("../contract-abi.json");
-const contractAddress = "0x59b670e9fA9D0A427751Af201D676719a970857b";
+const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 export const weatherInsuranceContract = new ethers.Contract(
   contractAddress,
@@ -104,7 +104,7 @@ export const connectWallet = async () => {
     } catch (err) {
       return {
         address: "",
-        status: "😥 " + err.message,
+        status: "⛔ " + err.message,
       };
     }
   } else {
