@@ -10,6 +10,10 @@ Imagine such a product: farmers can buy insurance starting from 0.1 ETH (Ether, 
 
 Granted it's a contrived example and real insurance companies don't work this way, but it's a great way to discover smart contracts and how to interact with them!
 
+Demo of what we're gonna build:
+
+[![Click to watch](https://img.youtube.com/vi/npg4VCvgmUQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=npg4VCvgmUQ)
+
 ## Project structure
 
 This is a full stack project. Backend provides smart contract logic running on a local Ethereum blockchain using Hardhat, frontend provides a React web app to connect to this local blockchain and interact with the smart contract.
@@ -186,7 +190,3 @@ Let's do it several times in a row with values above 41 degrees. After you do it
 
 ![enter image description here](https://user-images.githubusercontent.com/560815/152703735-dbc7ee49-d748-4a48-a15a-bd29fe3c4e1d.png)
 ![enter image description here](https://user-images.githubusercontent.com/560815/152703741-9ba042e0-8c99-4f97-92dd-cf0f2598879c.png)
-
-Here's a small video 🎥 of the whole process:
-
-[![Click to watch](https://img.youtube.com/vi/npg4VCvgmUQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=npg4VCvgmUQ)
