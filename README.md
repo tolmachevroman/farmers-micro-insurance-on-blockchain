@@ -6,13 +6,13 @@ Consider a situation: you're a farmer 🧑‍🌾 and need to protect your crops
 
 However, farmers living in developing countries often times don't have access to that level of insurance or traditional banking. You'd like to provide them with an accessible insurance product and decide on settlements automatically to save costs.
 
-Imagine such a product: farmers can buy insurance starting from 0.1 ETH (Ether, native cryptocurrency of Ethereum and second market cap after Bitcoin), about 300$ in early February 2022. Smart contract, a publicly available code, has no small letters or human meddling. It receives temperature updates from some external provider, say maximum daily temperature every day. If the last five temperatures were hotter than some defined threshold value, it will pay the settlement automatically.
+Imagine such a product: farmers can buy insurance starting from 0.1 ETH (Ether, native cryptocurrency of Ethereum and second market cap after Bitcoin), about 300$ in early February 2022. Smart contract, a publicly available code, has no small letters or human meddling. It receives temperature updates from some external provider, say maximum daily temperature every day. If the last five temperatures were hotter than some defined threshold value, contract will pay the settlement automatically.
 
 Granted it's a contrived example and real insurance companies don't work this way, but it's a great way to discover smart contracts and how to interact with them!
 
 ## Project structure
 
-This is a full stack project. Backend provides smart contract logic running on a local Ethereum blockchain using Hardhat, frontend provides a web app to connect to this local blockchain and interact with the smart contract using React.
+This is a full stack project. Backend provides smart contract logic running on a local Ethereum blockchain using Hardhat, frontend provides a React web app to connect to this local blockchain and interact with the smart contract.
 
 Technology stack includes [Hardhat](https://hardhat.org/) and [React](https://reactjs.org/) frameworks, Solidity for backend and Javascript for both of them. Both use [Ethers.js](https://docs.ethers.io/v5/) extensively, too.
 
@@ -29,7 +29,6 @@ Project can be divided in the following sections:
   - [Getting started with React](#getting-started-with-react)
   - [Interacting with the backend](#interacting-with-the-backend)
   - [Testing functionality with local Hardhat chain](#testing-functionality-with-local-hardhat-chain)
-- Final thoughts and notes
 
 ## Backend
 
@@ -37,7 +36,7 @@ Project can be divided in the following sections:
 
 Hardhat is an excellent choice when developing EVM compatible software. It provides clean and simple CLI to create, test and deploy smart contracts. It comes with local blockchain and predefined accounts to deploy your contracts locally to avoid typical delays when working with public chains.
 
-There's no need to deploy our contract on public test chains, and local chain fits perfectly our needs. Still as an exercise, I highly recommend going through [Alchemy tutorials](https://docs.alchemy.com/alchemy/tutorials/simple-web3-script). They are highly educational, and in fact this project was inspired by Alchemy samples.
+There's no need to deploy our contract on public test chains, and local chain fits our needs perfectly. Still as an exercise, I highly recommend going through the [Alchemy tutorials](https://docs.alchemy.com/alchemy/tutorials/simple-web3-script). They are highly educational, and in fact this project was inspired by Alchemy samples.
 
 We'll follow the [basic guide](https://hardhat.org/getting-started/) and create an empty Hardhat project and add an empty `WeatherInsurance.sol` contract.
 
@@ -61,9 +60,9 @@ Let's go through [the contract](https://github.com/tolmachevroman/farmers-micro-
 
 [Line 38](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/contracts/WeatherInsurance.sol#L38) Events are a way for Solidity to broadcast changes to the exterior. This event in particular will be useful later when interacting with the web app.
 
-[Lines 40-46](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/contracts/WeatherInsurance.sol#L40-L46) Our contract receives money on creation, so its `payable`. Settlements are greater than premiums, so it's a good idea to deploy contract with some reasonable amount of money to start with.
+[Lines 40-46](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/contracts/WeatherInsurance.sol#L40-L46) Our contract receives money on creation, so it is `payable`. Settlements are greater than premiums, so it's a good idea to deploy contract with some reasonable amount of money to start with.
 
-[Lines 49-71](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/contracts/WeatherInsurance.sol#L49-L71) `createInsurance()` is mostly for testing purposes, when we don't need to actually add a new insurance.
+[Lines 49-71](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/contracts/WeatherInsurance.sol#L49-L71) `createInsurance()` is mostly for testing purposes, to get an `Insurance` object without adding it on-chain.
 
 [Lines 73-98](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/contracts/WeatherInsurance.sol#L73-L98) `buyInsurance()` is called by our clients. It receives ETH sent by them and uses their address to create a new `Insurance` and add it on-chain. Notice that it will revert if the ETH sent is below minimum or if there's an active policy owned by this address.
 
@@ -103,7 +102,7 @@ Let's go through the [weather-insurance-test.js](https://github.com/tolmachevrom
 
 While working with Hardhat you'll eventually need to specify this or that parameter, add some dependency. Hardhat uses a special [config file](https://hardhat.org/config/#available-config-options) for that.
 
-Let's take a look at our [hardhat.config.js](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/hardhat.config.js) file. We added [hardhat-abi-exporter](https://www.npmjs.com/package/hardhat-abi-exporter) to have an ABI `.json` file every time contract is compiled. ABI stands for Application Binary Interface, it is a window to our smart contract and required on the frontend side.
+Let's take a look at our [hardhat.config.js](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/hardhat.config.js) file. We added [hardhat-abi-exporter](https://www.npmjs.com/package/hardhat-abi-exporter) to have an ABI `.json` file every time contract is compiled. ABI stands for Application Binary Interface, it is a window to our smart contract and is required on the frontend side.
 
 Another point to mention is Hardhat local chain. We set `chainId` to 1337 to make it visible to Metamask, a popular cryptowallet we'll use later. Also, we set initial balance of fake accounts to 100 ETH.
 
@@ -115,12 +114,15 @@ We don't want to deploy it to public chains, rather, we'll follow the [guide](ht
 
 We set 10 ETH as the initial balance when [deploying](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/scripts/deploy.js) our contract locally.
 
+Let's try and deploy it 🚀
+
 ![enter image description here](https://user-images.githubusercontent.com/560815/152700159-54f47900-fa5d-46ff-ba25-bf9f59aab68a.png)
 ![enter image description here](https://user-images.githubusercontent.com/560815/152703100-13ceb2c1-99d3-4f1c-acea-599fb313290c.png)
 ![enter image description here](https://user-images.githubusercontent.com/560815/152703105-3174a70a-0a02-407c-86a7-0a8a639f29b8.png)
-Notice that the contract owner is in fact the first account of the 20 accounts provided by Hardhat.
 
-You may have noticed that in the tests, we [skipped the first signer](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js#L168), and started with Alice and Bob as our clients. And that's because the first signer is just us, the ones deploying the contract. We can have an insurance too, no doubt! But I like to think of the contract owner as a _company_, and of others as _clients_.
+Check this: the contract owner is in fact the first account of the 20 accounts provided by Hardhat.
+
+You may have noticed that in the tests, we [skipped the first signer](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/backend/test/weather-insurance-test.js#L168), and started with Alice and Bob as our clients. And that's because the first signer is just us, the ones deploying the contract 🙋. We can have an insurance too, no doubt! But I like to think of contract owner as a _company_, and of others as _clients_.
 
 ## Frontend
 
@@ -132,7 +134,7 @@ We'll create a new React app and add a couple of files, namely a new widget and 
 
 What do we need in a web app to interact with an Ethereum blockchain? Well, several things: a cryptowallet to manage your money (aka tokens) and connect to a blockchain (not necessarily Ethereum), and a way to call contract methods and get responses.
 
-[Metamask](https://metamask.io/) is a popular wallet, it's installed as a browser extension. You can add multiple accounts there, for multiple blockchains, including a local one!
+[Metamask](https://metamask.io/) 🦊is a popular wallet, it's installed as a browser extension. You can add multiple accounts there, for multiple blockchains, including a local one.
 
 To get information of what methods are available from your smart contract, you use [contract-abi.json](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/frontend/src/contract-abi.json) file. You get this file automatically after installing the [hardhat-abi-exporter](https://www.npmjs.com/package/hardhat-abi-exporter) in the Hardhat project.
 
@@ -140,36 +142,51 @@ Finally, to tie this all together, you add a couple of callbacks to connect a Me
 
 We won't go line by line this time, but take a look at the [WeatherInsurance.js](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/frontend/src/WeatherInsurance.js) file.
 
-One important point to mention is `WeatherInsurance` contract [address](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/frontend/src/WeatherInsurance.js) on the blockchain you're connected to. You get this address after deploying the contract (see image above, _Contract address_ line). So for me and you these addresses will be different, make sure to update it with your actual contract address.
+One important point to mention is `WeatherInsurance` contract [address](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/frontend/src/WeatherInsurance.js) on the blockchain you're connected to. You get this address after deploying the contract (see image above, _Contract address_ line). So each time contract gets deployed it will get a new address, make sure to update your web app code with your current contract address.
 
 Notice also that here we have [only one signer](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/blob/main/frontend/src/util/interact.js#L30), the actual address connected via Metamask.
 
+FYI, I've run into a problem with "Nonce too high" after restarting the local Hardhat chain. Here's the [solution](https://medium.com/@thelasthash/solved-nonce-too-high-error-with-metamask-and-hardhat-adc66f092cd) 🔧if you run into the same issue.
+
 ### Testing functionality with local Hardhat chain
 
-Make sure you have the local Hardhat running and contract deployed. Copy and paste contract address as mentioned above.
+Make sure you have the local Hardhat running and contract deployed, an you use correct contract address.
 
 Go to the [frontend](https://github.com/tolmachevroman/farmers-micro-insurance-on-blockchain/tree/main/frontend) folder and start the web app. You should see something like this:
 
 ![enter image description here](https://user-images.githubusercontent.com/560815/152701710-90ae4d59-91b8-46b9-97db-b0892e1f0e21.png)
-Click on the Metamask icon in your browser, and you'll see your accounts. I have mine connected already. Notice it has less than 100 ETH, that's because I deployed contract using this account and spent 10 ETH as the initial balance:
+
+Click on the Metamask icon in your browser, and you'll see your accounts. Connect your account.
+
+I have mine connected already. Notice it has less than 100 ETH, that's because I deployed contract using this account and spent 10 ETH as the initial balance and some gas per each transaction:
+
 ![enter image description here](https://user-images.githubusercontent.com/560815/152701733-936534a5-696b-48e7-824e-9e72eabfbaa6.png)
+
 When testing with Hardhat local chain, it's useful to import several Hardhat accounts to your Metamask and switch between them to test for different users:
+
 ![enter image description here](https://user-images.githubusercontent.com/560815/152701797-728c5d72-eb83-4a07-9aeb-716bb40dcc22.png)
-Specify a premium, say 0.3 ETH, and try to buy an insurance. Metamask will ask you to confirm the transaction. Notice that section on top of the Metamask window: your currently connected account is interacting with contract address on a localhost:8545.
+
+Specify a premium, say 0.3 ETH, and try to buy an insurance. Metamask will ask you to confirm the transaction. Check that section on top of the Metamask window: your currently connected account is interacting with the contract on a `localhost:8545`.
+
 ![enter image description here](https://user-images.githubusercontent.com/560815/152703241-10008888-4347-4899-9691-36663fe4be1c.png)
-If transaction has been successful, you'll see message in the web app and also in terminal running the blockchain:
+
+If transaction has been successful, you'll see a message in the web app and also in the terminal running the blockchain:
+
 ![enter image description here](https://user-images.githubusercontent.com/560815/152703245-6d57c437-a3a7-4924-a9a3-9dfcff2b4566.png)
 
 Now let's try to update temperature:
+
 ![enter image description here](https://user-images.githubusercontent.com/560815/152703534-cbe6f63d-20f5-4565-958a-cdaddc914bc4.png)
+
 Again, you'll see messages in web app and terminal:
+
 ![enter image description here](https://user-images.githubusercontent.com/560815/152703537-c538b8ce-144c-4101-b3f1-8a82f6d031af.png)
-Let's do it several times in a row with values above 41 degrees. After you do it 5 times, you'll get paid your premium times multiplier (0.3 ETH times 3 = 0.9 ETH), and your insurance closed.
+
+Let's do it several times in a row with values above 41 degrees. After you do it 5 times, you'll get paid your premium times multiplier (0.3 ETH times 3 = 0.9 ETH), and your insurance will be closed. You can get a new one now!
+
 ![enter image description here](https://user-images.githubusercontent.com/560815/152703735-dbc7ee49-d748-4a48-a15a-bd29fe3c4e1d.png)
 ![enter image description here](https://user-images.githubusercontent.com/560815/152703741-9ba042e0-8c99-4f97-92dd-cf0f2598879c.png)
 
 Here's a small video 🎥 of the whole process:
 
-[video]
-
-FYI, I've run into a problem with "Nonce too high" after restarting the local Hardhat chain. Here's the [solution](https://medium.com/@thelasthash/solved-nonce-too-high-error-with-metamask-and-hardhat-adc66f092cd) 🔧if you run into the same issue.
+<iframe width="560" height="315" src="https://www.youtube.com/embed/npg4VCvgmUQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
