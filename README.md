@@ -189,4 +189,4 @@ Let's do it several times in a row with values above 41 degrees. After you do it
 
 Here's a small video 🎥 of the whole process:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/npg4VCvgmUQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![Click to watch](https://img.youtube.com/vi/npg4VCvgmUQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=npg4VCvgmUQ)
